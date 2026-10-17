@@ -1,0 +1,23 @@
+{
+  "providers": ["claude", "codex"],
+  "servers": {
+    "searxng": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-searxng"],
+      "env": { "SEARXNG_URL": "https://search.example.com" }
+    },
+    "playwright": {
+      "enabled": false,
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "project-api": {
+      "enabled": ["~/code/my-project", "/workspace/other-project"],
+      "type": "http",
+      "url": "https://example.com/api/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}

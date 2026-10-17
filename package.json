@@ -1,0 +1,21 @@
+{
+  "name": "mcp-hub",
+  "private": true,
+  "version": "0.0.0",
+  "files": [
+    "paseo-plugin.json",
+    "index.server.ts",
+    "server/"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@getpaseo/plugin": "0.10.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

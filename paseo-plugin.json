@@ -1,0 +1,6 @@
+{
+  "id": "mcp-hub",
+  "requirements": {
+    "paseo": ">=0.10.1"
+  }
+}
