@@ -286,28 +286,6 @@ function McpPopoverBody({
                         />
                       ) : null}
                     </View>
-                    {server.summary ? (
-                      <Text
-                        numberOfLines={2}
-                        style={{
-                          color: theme.colors.foregroundMuted,
-                          fontSize: 11,
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        {server.summary}
-                      </Text>
-                    ) : null}
-                    {server.envKeys.length > 0 ? (
-                      <Text style={{ color: theme.colors.foregroundMuted, fontSize: 11 }}>
-                        {t("popover.envKeys", { keys: server.envKeys.join(", ") })}
-                      </Text>
-                    ) : null}
-                    {server.headerKeys.length > 0 ? (
-                      <Text style={{ color: theme.colors.foregroundMuted, fontSize: 11 }}>
-                        {t("popover.headerKeys", { keys: server.headerKeys.join(", ") })}
-                      </Text>
-                    ) : null}
                   </View>
                 ))
               )}

@@ -133,8 +133,6 @@ export const de = {
     sourceOther: "extern",
     matchedGlobal: "global",
     matchedDir: "Ordner",
-    envKeys: "Env: {{keys}}",
-    headerKeys: "Header: {{keys}}",
     skippedToggle: "Aus Katalog übersprungen ({{count}})",
     reasons: {
       provider_excluded: "Provider ausgeschlossen",

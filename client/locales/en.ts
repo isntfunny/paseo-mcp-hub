@@ -133,8 +133,6 @@ export const en = {
     sourceOther: "other",
     matchedGlobal: "global",
     matchedDir: "dir",
-    envKeys: "env: {{keys}}",
-    headerKeys: "headers: {{keys}}",
     skippedToggle: "Skipped from catalog ({{count}})",
     reasons: {
       provider_excluded: "provider excluded",
