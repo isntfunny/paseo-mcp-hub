@@ -1,5 +1,5 @@
 import type { PluginButtonContentProps, PluginHostProps } from "@getpaseo/plugin/client";
-import { Icon, ScrollView } from "@getpaseo/plugin/client/ui";
+import { Icon } from "@getpaseo/plugin/client/ui";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { SkipReason } from "../shared/schema";
@@ -68,7 +68,7 @@ function McpPopoverBody({
     : [];
 
   return (
-    <View style={{ width: compact ? undefined : 360, gap: 10 }}>
+    <View style={{ gap: 10 }}>
       <View
         style={{
           flexDirection: "row",
@@ -215,8 +215,7 @@ function McpPopoverBody({
             </View>
           ) : null}
 
-          <ScrollView style={{ maxHeight: compact ? 360 : 320 }}>
-            <View style={{ gap: 8 }}>
+          <View style={{ gap: 8 }}>
               {data.active.length === 0 ? (
                 <View
                   style={{
@@ -377,7 +376,6 @@ function McpPopoverBody({
                 </View>
               ) : null}
             </View>
-          </ScrollView>
         </>
       )}
     </View>
