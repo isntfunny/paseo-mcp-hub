@@ -1,6 +1,14 @@
 {
   "id": "mcp-hub",
+  "name": "MCP Hub",
+  "description": "Central MCP server catalog for Paseo agents with project scoping, provider exclusions, and live session inspection.",
+  "translations": {
+    "de": {
+      "description": "Zentraler MCP-Server-Katalog für Paseo-Agents mit Projekt-Scoping, Provider-Ausschlüssen und Session-Ansicht."
+    }
+  },
+  "icon": "icon.png",
   "requirements": {
-    "paseo": ">=0.10.1"
+    "paseo": ">=0.16.0"
   }
 }

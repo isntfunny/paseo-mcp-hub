@@ -1,65 +1,98 @@
-# mcp-hub
+# MCP Hub for Paseo
 
-A [Paseo](https://github.com/getpaseo/paseo) plugin that keeps all MCP servers in
-one central catalog and injects them into new agent sessions, instead of
-maintaining them separately in `~/.claude.json`, `~/.codex/config.toml`, etc.
+A [Paseo](https://github.com/getpaseo/paseo) plugin that manages all your external MCP servers in one central catalog (`~/.paseo/mcp-hub/servers.json`), injects them automatically into new agent sessions, and lets you manage and inspect everything directly inside Paseo.
 
-It hooks `agent.create`, reads the catalog and sets the agent's `mcpServers`.
-The catalog is re-read on every agent creation, so edits apply to the next new
-session without reloading the plugin. Running sessions are not changed (Paseo
-only sets MCP servers when an agent is created).
+## Features
+
+- **Opt-out provider model (`excludeProviders`)** — works automatically across `claude`, `codex`, `agy`, `opencode`, `omp`, `copilot`, and custom providers (`pi` is excluded by default).
+- **Native Settings GUI (EN & DE)** — configure `stdio`, `http`, and `sse` servers, environment variables/headers, directory scopes, and excluded providers under **Settings → Plugins → MCP Hub** without editing JSON by hand (with raw JSON recovery & advanced editor included).
+- **Per-agent Composer Pill (`MCP N`)** — shows the active external MCP count right above each agent's composer and opens a popover listing active servers (including servers from other plugins like `shared-browser`), skipped catalog entries with reasons, and drift since session start.
+- **Project & git worktree scoping** — scope servers globally (`true`), off (`false`), to specific directories (`enabled: [...]`), or exclude directories (`disabled: [...]`). Git worktrees automatically match their parent repository.
+- **Zero-secret inspection** — `servers.json` is written atomically with `0600` permissions; agent metadata and the popover only ever expose key names and sanitized URLs without query tokens or credentials.
 
 ## Install
 
+Requirements: Paseo `>= 0.16.0` with plugins enabled.
+
+### From GitHub (recommended)
+
 ```sh
-git clone https://github.com/isntfunny/paseo-mcp-hub ~/paseo-plugins/mcp-hub
-cd ~/paseo-plugins/mcp-hub && npm install
+paseo plugin install github:isntfunny/paseo-mcp-hub
 ```
 
-Then add it to `~/.paseo/config.json` (plugins must be enabled):
+### From a local checkout
+
+```sh
+git clone https://github.com/isntfunny/paseo-mcp-hub ~/paseo-plugins/mcp-hub
+paseo plugin install ~/paseo-plugins/mcp-hub
+```
+
+To open settings directly from anywhere in Paseo, run **⌘K / Ctrl+K → MCP Hub: Open settings**.
+
+## Catalog (`servers.json`)
+
+Default path: `~/.paseo/mcp-hub/servers.json` (override via `MCP_HUB_CATALOG` on the Paseo daemon).
+The file is re-read on every agent creation, so edits take effect on the next new session without reloading the plugin. See [`servers.example.json`](servers.example.json).
+
+| Field | Description |
+| --- | --- |
+| `excludeProviders` | Provider IDs skipped by MCP Hub (default `["pi"]`). All other providers receive matching servers. |
+| `servers.<name>.type` | `stdio`, `http`, or `sse` |
+| `servers.<name>.command` / `args` / `env` | Command, argument array, and environment variables for `stdio` servers |
+| `servers.<name>.url` / `headers` | Endpoint URL and HTTP headers for `http` / `sse` servers |
+| `servers.<name>.enabled` | `true`, `false`, or an array of directories (`~` expanded), default `true` |
+| `servers.<name>.disabled` | Array of directories where the server is skipped even when `enabled` matches, default `[]` |
+
+### Example
 
 ```json
 {
-  "pluginsEnabled": true,
-  "plugins": {
-    "mcp-hub": { "source": "directory", "path": "/home/you/paseo-plugins/mcp-hub", "enabled": true }
+  "excludeProviders": ["pi"],
+  "servers": {
+    "searxng": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-searxng"],
+      "env": { "SEARXNG_URL": "https://search.example.com" },
+      "disabled": ["~/code/offline-only"]
+    },
+    "project-api": {
+      "enabled": ["~/code/my-project"],
+      "type": "http",
+      "url": "https://example.com/api/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
   }
 }
 ```
 
-## Catalog
+### Precedence & limits
 
-Default location: `~/.paseo/mcp-hub/servers.json` (override with the
-`MCP_HUB_CATALOG` environment variable of the Paseo daemon). It usually contains
-secrets, so `chmod 600` it. See [`servers.example.json`](servers.example.json).
+- Servers passed explicitly on `agent.create` win over catalog entries with the same name.
+- `disabled` wins over `enabled`.
+- Server name `paseo` is reserved by Paseo and cannot be added to the catalog.
+- Running sessions keep the servers they launched with; changes apply to newly created sessions.
+- A malformed catalog file is logged and skipped so it never blocks agent creation.
 
-| Field | Description |
-| --- | --- |
-| `providers` | Providers that receive the servers (default `["claude", "codex"]`). Others are left untouched. |
-| `servers.<name>.type` | `stdio`, `http` or `sse` |
-| `servers.<name>.command` / `args` / `env` | for `stdio` servers |
-| `servers.<name>.url` / `headers` | for `http` / `sse` servers |
-| `servers.<name>.enabled` | see below, default `true` |
+### Migrating from v0.1 (`providers` allowlist)
 
-### `enabled`
+Earlier versions used `"providers": ["claude", "codex"]` as an allowlist. That field is now ignored in favor of `"excludeProviders"` (default `["pi"]`). Existing `servers.json` files continue working immediately without manual edits; saving once in the Settings UI updates the file to `excludeProviders`.
 
-- `true` / `false`: the server is on or off for every new session.
-- An array of directories: the server is only added when the agent's working
-  directory is one of them or lies below one of them. `~` is expanded.
-  Git worktrees (such as Paseo's `~/.paseo/worktrees/...`) count as the
-  repository they belong to, so a project path also matches its worktrees.
+## Security
 
-```json
-"project-api": {
-  "enabled": ["~/code/my-project"],
-  "type": "http",
-  "url": "https://example.com/api/mcp"
-}
+`servers.json` typically stores API tokens and credentials:
+
+- The server keeps file permissions at `0600` on every write.
+- Environment variable values, header values, and URL query strings/credentials are stripped before writing agent metadata or returning session status to the client popover.
+
+## Development
+
+```sh
+npm install
+npm run typecheck
+npm test
+paseo plugin reload mcp-hub
 ```
-
-Servers passed explicitly in the agent create request win over catalog entries
-with the same name. A broken catalog is logged and ignored; it never blocks
-agent creation.
 
 ## License
 

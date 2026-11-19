@@ -6,6 +6,7 @@
     "lib": [
       "ES2023"
     ],
+    "jsx": "react-jsx",
     "types": [
       "node"
     ],
@@ -18,5 +19,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

@@ -1,11 +1,14 @@
 {
-  "providers": ["claude", "codex"],
+  "excludeProviders": ["pi"],
   "servers": {
     "searxng": {
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "mcp-searxng"],
-      "env": { "SEARXNG_URL": "https://search.example.com" }
+      "env": {
+        "SEARXNG_URL": "https://search.example.com"
+      },
+      "disabled": ["~/code/offline-only"]
     },
     "playwright": {
       "enabled": false,
@@ -17,7 +20,9 @@
       "enabled": ["~/code/my-project", "/workspace/other-project"],
       "type": "http",
       "url": "https://example.com/api/mcp",
-      "headers": { "Authorization": "Bearer <token>" }
+      "headers": {
+        "Authorization": "Bearer <token>"
+      }
     }
   }
 }

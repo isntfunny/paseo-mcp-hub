@@ -1,21 +1,38 @@
 {
-  "name": "mcp-hub",
-  "private": true,
-  "version": "0.0.0",
+  "name": "paseo-mcp-hub",
+  "version": "0.2.0",
+  "description": "Central MCP server catalog for Paseo agents with project scoping, provider exclusions, and live session inspection.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isntfunny/paseo-mcp-hub.git"
+  },
+  "type": "module",
   "files": [
     "paseo-plugin.json",
+    "OVERVIEW.md",
+    "icon.png",
+    "index.client.tsx",
     "index.server.ts",
-    "server/"
+    "client/",
+    "server/",
+    "shared/",
+    "LICENSE",
+    "!**/*.test.ts"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@getpaseo/plugin": "0.10.1",
+    "@getpaseo/plugin": "0.16.2",
+    "@tanstack/react-query": "^5.90.11",
+    "@types/node": "^22.12.0",
+    "@types/react": "~19.2.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
     "typescript": "^5.9.3",
-    "@types/node": "^22.0.0"
-  },
-  "dependencies": {
+    "vitest": "^3.2.4",
     "zod": "^4.4.3"
   }
 }
