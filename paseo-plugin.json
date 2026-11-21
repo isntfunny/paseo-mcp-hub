@@ -10,5 +10,6 @@
   "icon": "icon.png",
   "requirements": {
     "paseo": ">=0.16.0"
-  }
+  },
+  "build": [["npm", "ci"]]
 }
