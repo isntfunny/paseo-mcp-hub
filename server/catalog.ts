@@ -245,8 +245,21 @@ export async function readCatalogState(filePath = catalogPath): Promise<CatalogR
   };
 }
 
+// Keep the revision check and rename together for writers inside the plugin.
+let pendingSave: Promise<unknown> = Promise.resolve();
+
+export function saveCatalogAtomic(
+  input: Catalog,
+  expectedRevision: string,
+  filePath = catalogPath,
+): Promise<CatalogSaveResult> {
+  const save = pendingSave.then(() => writeCatalog(input, expectedRevision, filePath));
+  pendingSave = save.catch(() => undefined);
+  return save;
+}
+
 /** Write a validated catalog atomically with 0600 permissions and optimistic revision check. */
-export async function saveCatalogAtomic(
+async function writeCatalog(
   input: Catalog,
   expectedRevision: string,
   filePath = catalogPath,

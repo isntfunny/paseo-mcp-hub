@@ -78,6 +78,22 @@ The file is re-read on every agent creation, so edits take effect on the next ne
 
 Earlier versions used `"providers": ["claude", "codex"]` as an allowlist. That field is now ignored in favor of `"excludeProviders"` (default `["pi"]`). Existing `servers.json` files continue working immediately without manual edits; saving once in the Settings UI updates the file to `excludeProviders`.
 
+## Manage the catalog from an agent
+
+Interactive agents on supported, non-excluded providers receive the
+`mcp-hub-admin` MCP server when their session opens. It exposes one tool,
+`manage_server`, with a server `name` and an `action`:
+
+- `add` creates an entry. Supply `config` with the transport and its URL or command.
+- `update` replaces the fields supplied in `config`. Omitted fields remain as stored.
+  When changing the transport, supply the new URL or command.
+- `remove` deletes an entry by name. Omit `config`.
+
+For example, `{"action":"update","name":"project-api","config":{"enabled":false}}`
+disables a server in the shared catalog. Catalog changes apply to newly created
+agents. The management tool has write access to the daemon-wide catalog, including
+entries that launch local commands.
+
 ## Security
 
 `servers.json` typically stores API tokens and credentials:

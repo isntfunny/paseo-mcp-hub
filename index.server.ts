@@ -2,10 +2,12 @@ import type { PluginServerContext } from "@getpaseo/plugin/server";
 import { inspectAgentMcps } from "./server/agent-mcps";
 import {
   evaluateCatalog,
+  normalizeProviderId,
   readCatalogState,
   saveCatalogAtomic,
   saveRawCatalogAtomic,
 } from "./server/catalog";
+import { catalogMcpName, startCatalogMcp } from "./server/catalog-mcp";
 import { listDaemonProviders } from "./server/providers";
 import {
   agentMcpsRpc,
@@ -17,6 +19,28 @@ import {
 import type { HubAgentMetadata } from "./shared/schema";
 
 export default function contribute(server: PluginServerContext) {
+  const catalogMcp = startCatalogMcp().catch(() => {
+    console.error("mcp-hub: Catalog management MCP could not start");
+    return undefined;
+  });
+  const stopOpenHook = server.addHook("agent.open.before", async ({ request }) => {
+    if (request.purpose !== "interactive") return undefined;
+    const state = await readCatalogState();
+    if (
+      state.status !== "ready" ||
+      state.catalog.excludeProviders.includes(normalizeProviderId(request.provider))
+    ) {
+      return undefined;
+    }
+
+    const management = await catalogMcp;
+    if (!management) return undefined;
+    return {
+      ...request,
+      mcpServers: { ...request.mcpServers, [catalogMcpName]: management.config },
+    };
+  });
+
   const stopCreateHook = server.addHook("agent.create.before", async ({ request }) => {
     if (request.config.internal) return undefined;
 
@@ -32,6 +56,7 @@ export default function contribute(server: PluginServerContext) {
     }
 
     const existingNames = new Set(Object.keys(request.config.mcpServers ?? {}));
+    existingNames.add(catalogMcpName);
     const evaluation = await evaluateCatalog(state.catalog, {
       provider: request.config.provider,
       cwd: request.config.cwd,
@@ -86,7 +111,10 @@ export default function contribute(server: PluginServerContext) {
     inspectAgentMcps(paseo, agentId),
   );
 
-  return () => {
+  return async () => {
     stopCreateHook();
+    stopOpenHook();
+    const management = await catalogMcp;
+    await management?.close();
   };
 }
